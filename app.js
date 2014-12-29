@@ -1,80 +1,68 @@
-var m = 31;
-var n = 21;
+// Requirements
+var fs = require('fs');
 
-var matrix = [];
+var t = 0;
 
-var walls = [];
+// Constants
+var A = 2
+  , M = 2 * A + 1
+  , matrix = new Array(M * M)
+  , walls = []
+  , dimensions = 2
+  , start, stop, time;
 
-function rand(min, max) {
-	return Math.floor(Math.random() * (max - min)) + min;
-}
-
-for (var i = 0; i < m; i++) {
-	matrix[i] = [];
-	for (var j = 0; j < n; j++) {
-		matrix[i][j] = 0;
+// Functions
+var rand = function (min, max) { return Math.floor(Math.random() * (max - min)) + min; }
+  ,	inMaze = function (point) {
+  		console.log(point > M);
+		var Y = point % M;
+	  	var X = point / M | 0;
+	  	var test = 0 <= point && point < M * M && 0 <= X && 0 <= Y && X < M && Y < M;
+	  	return ++t < 3000 && test;
 	}
-}
-
-matrix[0][0] = 1;
-walls.push({
-	x: 0,
-	y: 1,
-	direction: {
-		x: 0,
-		y: 1
+  , addWallOne = function (point, direction) {
+		if (inMaze(point + direction)) {
+			walls.push({
+				point: point + direction,
+				direction: direction
+			});
+		}
 	}
-});
-walls.push({
-	x: 1,
-	y: 0,
-	direction: {
-		x: 1,
-		y: 0
+  , getCoordinates = function (point) {
+		return [point / M | 0, point % M];
+  }
+  , addWall = function (point) {
+		matrix[point] = 1;
+		for (var i = 0; i < directions.length; i++) {
+			addWallOne(point, directions[i]);
+		};
 	}
-});
+  , isFree = function (point) { return inMaze(point) && !matrix[point]; }
 
+// Directions
+var directions = (function () {
+  	return [1, -1, M, -M]
+})();
+
+// Add the first cell (as a wall)
+addWall(0);
+
+start = Date.now();
 while (walls.length > 0) {
 	var r = rand(0, walls.length - 1);
 	var wall = walls.splice(r, 1)[0];
-	var newX = wall.x + wall.direction.x;
-	var newY = wall.y + wall.direction.y;
-	if (0 <= newX && m > newX && 0 <= newY && n > newY && 0 <= wall.x && m > wall.x && 0 <= wall.y && n > wall.y && !matrix[newX][newY]) {
-		matrix[wall.x][wall.y] = 1;
-		matrix[newX][newY] = 1;
-		walls.push({
-			x: newX,
-			y: newX + 1,
-			direction: {
-				x: 0,
-				y: 1
-			}
-		});
-		walls.push({
-			x: newX + 1,
-			y: newY,
-			direction: {
-				x: 1,
-				y: 0
-			}
-		});
-		walls.push({
-			x: newX,
-			y: newX - 1,
-			direction: {
-				x: 0,
-				y: -1
-			}
-		});
-		walls.push({
-			x: newX - 1,
-			y: newY,
-			direction: {
-				x: -1,
-				y: 0
-			}
-		});
+	//console.log(wall);
+	if (isFree(wall.point + wall.direction)) {
+		matrix[wall.point] = 1;
+		addWall(wall.point + wall.direction);
 	};
 }
+stop = Date.now();
 
-console.log(matrix);
+fs.writeFile('./maze.json', JSON.stringify(matrix));
+
+console.log(stop - start + "ms");
+
+while (matrix.length > 0) {
+	console.log(matrix.splice(0, M));
+}
