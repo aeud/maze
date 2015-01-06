@@ -9,7 +9,7 @@
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script>
 d3.json('./maze.json', function(dataset){
-  var cellSize = 2;
+  var cellSize = 3;
   var svg = d3.select("body").append("svg").attr("width", dataset.length * cellSize).attr("height", dataset.length * cellSize);
   var gs = svg.selectAll("g").data(dataset).enter().append("g").attr("transform", function(d, i){
     return "translate(0, " + i * cellSize + ")";
