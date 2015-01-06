@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style type="text/css">
+  body {
+    background-color: #000;
+  }
+</style>
+<body>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script>
+d3.json('./maze.json', function(dataset){
+  var cellSize = 3;
+  var svg = d3.select("body").append("svg").attr("width", dataset.length * cellSize).attr("height", dataset.length * cellSize);
+  var gs = svg.selectAll("g").data(dataset).enter().append("g").attr("transform", function(d, i){
+    return "translate(0, " + i * cellSize + ")";
+  });
+  var rects = gs.selectAll("rect").data(function(d){
+    return d;
+  }).enter().append("rect").attr("x", function(d, i){
+    return i * cellSize;
+  }).attr("y", 0)
+  .attr("width", cellSize)
+  .attr("height", cellSize)
+  .attr("fill", function(d){
+    return d ? "#fff" : "#000";
+  });
+})
+</script>
